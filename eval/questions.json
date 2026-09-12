@@ -1,0 +1,194 @@
+[
+  {
+    "question": "What are the two lock modes used in Two-Phase Locking, and what does each one permit?",
+    "expectedStatus": "ANSWERED",
+    "expectedDoc": "concurrency_control1.pdf",
+    "expectedPage": 6
+  },
+  {
+    "question": "Under the Wait-Die deadlock prevention scheme, what determines whether a transaction requesting a locked item is allowed to wait or gets aborted?",
+    "expectedStatus": "ANSWERED",
+    "expectedDoc": "concurrency_control1.pdf",
+    "expectedPage": 28
+  },
+  {
+    "question": "What are the three phases of Validation (Optimistic) Concurrency Control?",
+    "expectedStatus": "ANSWERED",
+    "expectedDoc": "concurrency_control1.pdf",
+    "expectedPage": 47
+  },
+  {
+    "question": "What is the difference between Basic and Conservative Two-Phase Locking in terms of when a transaction acquires its locks?",
+    "expectedStatus": "ANSWERED",
+    "expectedDoc": "concurrency_control1.pdf",
+    "expectedPage": 21
+  },
+  {
+    "question": "Besides plain read and write locks, what three additional locking modes are defined for Multiple Granularity Locking?",
+    "expectedStatus": "ANSWERED",
+    "expectedDoc": "concurrency_control1.pdf",
+    "expectedPage": 52
+  },
+  {
+    "question": "What is Thomas's Write Rule, and how does it treat a write operation that's already been superseded by a more recent write?",
+    "expectedStatus": "ANSWERED",
+    "expectedDoc": "concurrency_control1.pdf",
+    "expectedPage": 38
+  },
+  {
+    "question": "According to my study guide, what's the difference between a recoverable schedule and a cascadeless schedule?",
+    "expectedStatus": "ANSWERED",
+    "expectedDoc": "notes.md",
+    "expectedPage": 1
+  },
+  {
+    "question": "How does my study guide define starvation, and how is that different from a deadlock?",
+    "expectedStatus": "ANSWERED",
+    "expectedDoc": "notes.md",
+    "expectedPage": 1
+  },
+  {
+    "question": "According to my handwritten notes, how is a transaction defined?",
+    "expectedStatus": "ANSWERED",
+    "expectedDoc": "transaction_acid_intro.png",
+    "expectedPage": 1
+  },
+  {
+    "question": "According to my handwritten notes, what does the Isolation property say about concurrent transactions?",
+    "expectedStatus": "ANSWERED",
+    "expectedDoc": "acid_properties_detail.png",
+    "expectedPage": 1
+  },
+
+  {
+    "question": "My handwritten ACID diagram groups two properties under one heading. Based on the diagram and my study guide, which two properties are grouped together, and under what heading?",
+    "expectedStatus": "ANSWERED",
+    "expectedDoc": "notes.md",
+    "expectedPage": 1,
+    "expectedSources": [{ "doc_id": "acid_properties_detail.png", "page": 1 }, { "doc_id": "notes.md", "page": 1 }]
+  },
+  {
+    "question": "My handwritten notes describe Isolation as concurrent transactions not interfering with each other. What specific mechanism do the slides say Two-Phase Locking uses to enforce exactly that?",
+    "expectedStatus": "ANSWERED",
+    "expectedDoc": "concurrency_control1.pdf",
+    "expectedPage": 4,
+    "expectedSources": [{ "doc_id": "acid_properties_detail.png", "page": 1 }, { "doc_id": "concurrency_control1.pdf", "page": 4 }]
+  },
+  {
+    "question": "My study guide defines a dirty read. Which two-phase locking protocol do the slides describe as eliminating dirty reads, and how does it do that?",
+    "expectedStatus": "ANSWERED",
+    "expectedDoc": "concurrency_control1.pdf",
+    "expectedPage": 24,
+    "expectedSources": [{ "doc_id": "notes.md", "page": 1 }, { "doc_id": "concurrency_control1.pdf", "page": 24 }]
+  },
+  {
+    "question": "Using my study guide's definitions of 'recoverable' and 'cascadeless,' which of those properties does the Rigorous Two-Phase Locking Protocol guarantee according to the slides?",
+    "expectedStatus": "ANSWERED",
+    "expectedDoc": "concurrency_control1.pdf",
+    "expectedPage": 23,
+    "expectedSources": [{ "doc_id": "notes.md", "page": 1 }, { "doc_id": "concurrency_control1.pdf", "page": 23 }]
+  },
+  {
+    "question": "Using my study guide's definition of starvation, why do the slides say the Wound-Wait scheme can cause a younger transaction to starve?",
+    "expectedStatus": "ANSWERED",
+    "expectedDoc": "concurrency_control1.pdf",
+    "expectedPage": 34,
+    "expectedSources": [{ "doc_id": "notes.md", "page": 1 }, { "doc_id": "concurrency_control1.pdf", "page": 34 }]
+  },
+  {
+    "question": "My study guide explains the lock granularity trade-off between concurrency and overhead. Which end of that trade-off does the slides' 'entire database' example represent?",
+    "expectedStatus": "ANSWERED",
+    "expectedDoc": "concurrency_control1.pdf",
+    "expectedPage": 50,
+    "expectedSources": [{ "doc_id": "notes.md", "page": 1 }, { "doc_id": "concurrency_control1.pdf", "page": 50 }]
+  },
+  {
+    "question": "Using my study guide's general definition of timestamp ordering, what specific check does the slides' Basic Timestamp Ordering rule perform before letting a write_item(X) operation proceed?",
+    "expectedStatus": "ANSWERED",
+    "expectedDoc": "concurrency_control1.pdf",
+    "expectedPage": 36,
+    "expectedSources": [{ "doc_id": "notes.md", "page": 1 }, { "doc_id": "concurrency_control1.pdf", "page": 36 }]
+  },
+  {
+    "question": "Based on my study guide's definition of optimistic concurrency control, at what point in the slides' three-phase validation scheme does a transaction actually get rejected?",
+    "expectedStatus": "ANSWERED",
+    "expectedDoc": "concurrency_control1.pdf",
+    "expectedPage": 48,
+    "expectedSources": [{ "doc_id": "notes.md", "page": 1 }, { "doc_id": "concurrency_control1.pdf", "page": 48 }]
+  },
+  {
+    "question": "My handwritten notes describe a transaction as accessing and updating data items. What do the slides say happens when two transactions conflict over the same data item?",
+    "expectedStatus": "ANSWERED",
+    "expectedDoc": "concurrency_control1.pdf",
+    "expectedPage": 4,
+    "expectedSources": [{ "doc_id": "transaction_acid_intro.png", "page": 1 }, { "doc_id": "concurrency_control1.pdf", "page": 4 }]
+  },
+  {
+    "question": "Combining my handwritten notes' definition of Atomicity with my study guide's definition of a recoverable schedule, why would a non-recoverable schedule risk violating atomicity even for a transaction that never touched the aborted transaction's data directly?",
+    "expectedStatus": "ANSWERED",
+    "expectedDoc": "notes.md",
+    "expectedPage": 1,
+    "expectedSources": [{ "doc_id": "transaction_acid_intro.png", "page": 1 }, { "doc_id": "notes.md", "page": 1 }]
+  },
+
+  {
+    "question": "What are the differences between First, Second, and Third Normal Form in relational database design?",
+    "expectedStatus": "NOT_COVERED",
+    "expectedDoc": null,
+    "expectedPage": null
+  },
+  {
+    "question": "How do you convert an Entity-Relationship diagram into a relational schema?",
+    "expectedStatus": "NOT_COVERED",
+    "expectedDoc": null,
+    "expectedPage": null
+  },
+  {
+    "question": "What is the structure of a B+ tree index and why is it preferred for disk-based indexing?",
+    "expectedStatus": "NOT_COVERED",
+    "expectedDoc": null,
+    "expectedPage": null
+  },
+  {
+    "question": "How does a query optimizer estimate and compare the cost of different join algorithms?",
+    "expectedStatus": "NOT_COVERED",
+    "expectedDoc": null,
+    "expectedPage": null
+  },
+  {
+    "question": "What is the syntax for writing a correlated subquery in SQL?",
+    "expectedStatus": "NOT_COVERED",
+    "expectedDoc": null,
+    "expectedPage": null
+  },
+  {
+    "question": "What ACID guarantees do NoSQL databases like MongoDB provide compared to relational databases?",
+    "expectedStatus": "NOT_COVERED",
+    "expectedDoc": null,
+    "expectedPage": null
+  },
+  {
+    "question": "What is the ARIES algorithm used for database crash recovery, and what are its three phases?",
+    "expectedStatus": "NOT_COVERED",
+    "expectedDoc": null,
+    "expectedPage": null
+  },
+  {
+    "question": "How is data physically organized on disk in terms of blocks, extents, and file organization methods?",
+    "expectedStatus": "NOT_COVERED",
+    "expectedDoc": null,
+    "expectedPage": null
+  },
+  {
+    "question": "What are common database security threats, and how does role-based access control mitigate them?",
+    "expectedStatus": "NOT_COVERED",
+    "expectedDoc": null,
+    "expectedPage": null
+  },
+  {
+    "question": "What is a functional dependency, and how is it used to determine a candidate key for a relation?",
+    "expectedStatus": "NOT_COVERED",
+    "expectedDoc": null,
+    "expectedPage": null
+  }
+]
