@@ -217,3 +217,13 @@ The project can run on a fully local path using Ollama for handwritten-note OCR 
 Rather than treating OCR output as perfect, the app records low-confidence transcriptions and visibly marks them as **OCR: REVIEW ORIGINAL**. For every handwritten citation, the user can open the original uploaded image beside the answer. This means an imperfect transcription remains useful for retrieval, while the student still has the final evidence needed to verify it.
 
 Groq can optionally be used for final answer generation. It is generally faster and more consistent for structured cited responses, but it requires an API key, internet access, and can hit request-rate limits during a large evaluation run. The app retries temporary Groq rate-limit and server errors instead of immediately treating them as failed answers.
+
+## System Design
+
+### High-Level Design (HLD)
+
+![High-Level Design](./docs/HLD.jpg)
+
+### Low-Level Design (LLD)
+
+![Low-Level Design](./docs/LLD.jpg)
