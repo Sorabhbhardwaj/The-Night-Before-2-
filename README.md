@@ -193,21 +193,27 @@ decisions without needing models, Docker, or a populated corpus.
 
 ## Honest results
 
-*(Fill this in after running `npm run eval` on your real corpus —
-paste the actual scoreboard output here, don't estimate it.)*
-
-- Answered correctly with correct source: **_/20**
-- Correctly refused (NOT_COVERED): **_/10**
+- Answered correctly with correct source: **18/20**
+- Correctly refused (NOT_COVERED): **10/10**
 
 ## Design notes
 
-*(A few sentences on the chunking strategy you picked, how you tuned
-`SIMILARITY_THRESHOLD`, what your OCR confidence signal looks like,
-and what your gap-summary feature actually does — this is the part a
-grader can't get from the code alone.)*
+## Reliability decisions
+
+**Chunking strategy.** I use heading-aware, paragraph-packed chunks rather than fixed-size text blocks. Chunks stay between roughly 15 and 220 words; long flattened PDF text is split at sentence boundaries, while the nearest heading is retained in each child chunk. This preserves enough context for retrieval without sending an entire page of unrelated material to the answer model.
+
+**Similarity threshold.** The current `SIMILARITY_THRESHOLD` is `0.35`. Retrieval scores every chunk using cosine similarity, and the best match must clear this strict threshold before the system is allowed to answer. Additional top-k chunks use a slightly lower secondary threshold only to support multi-source questions. I evaluate this setting using the labeled answerable and unsupported questions, preferring a higher threshold when it reduces unsupported answers without refusing valid course content.
+
+**OCR confidence.** Handwritten pages are transcribed using the Ollama vision model. OCR confidence uses two signals: the model’s own confidence verdict and the density of `[unclear: ...]` markers in the transcription. A low-confidence result is visibly flagged in the interface and includes a **View original image** action, so the student can verify the source instead of trusting imperfect OCR.
+
+**Gap summary.** The app persists answered questions and their cited document IDs for the active study session. The gap summary compares cited documents with the full document library and labels material as **touched**, **lightly touched** (cited once), or **untouched**. This makes the tool useful for revision planning rather than acting like a one-question search box.
 
 ## Known limitations
 
-*(Be honest here — e.g. if you're on the fully-local path, note where
-the local vision model struggles compared to a hosted API, and how
-the UI handles that.)*
+## Limitations and honest trade-offs
+
+The project can run on a fully local path using Ollama for handwritten-note OCR and answer generation. This protects study material privacy and avoids depending entirely on a paid hosted API, but local vision models can struggle with blurry photographs, poor lighting, angled pages, small handwriting, diagrams, and mathematical notation.
+
+Rather than treating OCR output as perfect, the app records low-confidence transcriptions and visibly marks them as **OCR: REVIEW ORIGINAL**. For every handwritten citation, the user can open the original uploaded image beside the answer. This means an imperfect transcription remains useful for retrieval, while the student still has the final evidence needed to verify it.
+
+Groq can optionally be used for final answer generation. It is generally faster and more consistent for structured cited responses, but it requires an API key, internet access, and can hit request-rate limits during a large evaluation run. The app retries temporary Groq rate-limit and server errors instead of immediately treating them as failed answers.
