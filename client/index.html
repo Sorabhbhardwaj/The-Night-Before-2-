@@ -7,11 +7,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
   <div class="app-shell">
-    <aside class="sidebar">
+    <aside class="sidebar" aria-label="Course workspace">
       <a class="brand" href="/" aria-label="Recall home"><span class="brand-mark">R</span><span>recall</span></a>
       <div class="course-label"><span class="pulse"></span> ACTIVE COURSE MATERIAL</div>
       <section class="side-section sources-section">
@@ -22,7 +22,7 @@
         <div class="section-heading"><h2>Study coverage</h2><button id="refresh-gaps" class="icon-button" title="Refresh coverage">↻</button></div>
         <div id="gap-summary" class="gap-summary"><p class="muted">Your review map will build as you study.</p></div>
       </section>
-      <section class="side-section upload-section">
+      <section id="upload-material" class="side-section upload-section">
         <div class="section-heading"><h2>Add material</h2><span>25 MB max</span></div>
         <form id="upload-form">
           <label class="type-label" for="upload-type">Classify as</label>
@@ -35,8 +35,8 @@
       <p class="local-note">Your materials stay in this workspace.</p>
     </aside>
     <main class="main">
-      <header class="topbar"><div><p class="eyebrow">EXAM MODE</p><h1>Ask your course materials.</h1></div><div class="trust-chip"><span>✓</span> Citation-first answers</div></header>
-      <div id="chat" class="chat"><section class="welcome-card empty-state"><p class="eyebrow">THE 2AM STUDY PARTNER</p><h2>Understand the thing.<br><em>Find it again.</em></h2><p>Every answer is grounded in your own documents. Open the cited page, inspect the original handwritten note, and get a clean refusal when your material is silent.</p><div class="starter-questions"><button data-question="Compare the two main algorithms in my notes and cite the pages.">Compare two algorithms</button><button data-question="What is the most important definition I should memorise?">Find key definitions</button><button data-question="What topics have I not reviewed yet?">Show my gaps</button></div></section></div>
+      <header class="topbar"><a class="mobile-brand brand" href="/" aria-label="Recall home"><span class="brand-mark">R</span><span>recall</span></a><nav class="top-nav" aria-label="Primary navigation"><a href="#chat">Research</a><a href="#upload-material">Library</a></nav><a class="add-material-link" href="#upload-material"><span aria-hidden="true">+</span> Add material</a></header>
+      <div id="chat" class="chat"><section class="welcome-card empty-state"><p class="eyebrow"><span class="eyebrow-dot"></span>Grounded course research</p><h1>Ask questions. Get answers from <em>your course material.</em></h1><p>Recall searches only the documents you upload, then returns a concise answer with exact source and page references.</p><div class="starter-questions"><button data-question="Compare the two main algorithms in my notes and cite the pages.">Compare algorithms <span>↗</span></button><button data-question="What is the most important definition I should memorise?">Find key definitions <span>↗</span></button><button data-question="What topics have I not reviewed yet?">Show study gaps <span>↗</span></button></div><div class="hero-footnote"><span>⌘</span> Built for source-first study sessions</div></section></div>
       <form id="ask-form" class="ask-form"><label class="ask-label" for="question-input">ASK RECALL</label><div class="input-row"><input type="text" id="question-input" placeholder="What is the difference between these two algorithms?" autocomplete="off" /><button type="submit" id="ask-btn">Ask <span>↵</span></button></div><p>Answers only from your uploaded course material.</p></form>
     </main>
   </div>

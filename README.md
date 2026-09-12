@@ -227,3 +227,21 @@ Groq can optionally be used for final answer generation. It is generally faster 
 ### Low-Level Design (LLD)
 
 ![Low-Level Design](./docs/LLD.png)
+
+
+## 📸 Screenshots
+
+### Home
+![Home Page](./screenshots/home.png)
+
+### Dashboard
+![Dashboard](./screenshots/dashboard.png)
+
+### RAG Chat
+![RAG Chat](./screenshots/rag-chat.png)
+
+### Answers with Citations
+![Citations](./screenshots/citation.png)
+
+## Uploading Files
+![Upload](./screenshots/uploading.png)

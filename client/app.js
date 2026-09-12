@@ -1,9 +1,758 @@
-const $=s=>document.querySelector(s),chatEl=$("#chat"),askForm=$("#ask-form"),questionInput=$("#question-input"),askBtn=$("#ask-btn"),docListEl=$("#doc-list"),gapSummaryEl=$("#gap-summary"),uploadForm=$("#upload-form"),uploadType=$("#upload-type"),fileInput=$("#file-input"),fileName=$("#file-name"),uploadStatus=$("#upload-status"),dropZone=$("#drop-zone"),lightbox=$("#lightbox"),lightboxImg=$("#lightbox-img");
-const typeLabel={pdf:"LECTURE",slides:"SLIDES",markdown:"NOTES",handwritten:"HANDWRITTEN"};
-function el(t,c,x){const n=document.createElement(t);if(c)n.className=c;if(x)n.textContent=x;return n}function clearWelcome(){$(".empty-state")?.remove()}function scrollBottom(){chatEl.scrollTop=chatEl.scrollHeight}function renderQuestion(q){clearWelcome();const b=el("article","qa-block");b.append(el("div","question-bubble",q));chatEl.append(b);scrollBottom();return b}function renderLoading(b){const n=el("div","answer-card loading","Reading your material and checking sources…");b.append(n);scrollBottom();return n}function sourceUrl(c){return c.source_path?`/corpus/${c.source_path}${c.page&&c.doc_type!=="handwritten"?`#page=${c.page}`:""}`:null}
-function renderAnswer(block,loading,result){loading?.remove();const card=el("section","answer-card"),header=el("div","answer-header"),pill=el("span",`status-pill status-${result.status}`,result.status==="ANSWERED"?"Grounded answer":result.status==="NOT_COVERED"?"Not covered":"Couldn’t verify");header.append(pill);if(result.status==="ANSWERED")header.append(el("span","verified","SOURCE CHECKED"));card.append(header,el("p","answer-text",result.answer||"No answer returned."));if(result.citations?.length){const wrap=el("div","citations");wrap.append(el("p","citation-title","READ IT IN CONTEXT"));result.citations.forEach(c=>{const cite=el("article","citation"),meta=el("div","citation-meta");meta.append(el("span","cite-type",typeLabel[c.doc_type]||"SOURCE"),el("strong","",`${c.doc_id}${c.page!=null?` · page ${c.page}`:""}`));if(c.ocr_confidence==="low")meta.append(el("span","confidence-flag","OCR: REVIEW ORIGINAL"));cite.append(meta);if(c.excerpt)cite.append(el("p","citation-excerpt",`“${c.excerpt}”`));const actions=el("div","citation-actions");if(c.image_path){const view=el("button","source-action","View original image");view.type="button";view.onclick=()=>{lightboxImg.src=`/corpus/${c.image_path}`;lightbox.classList.remove("hidden")};actions.append(view)}const url=sourceUrl(c);if(url){const link=el("a","source-action",c.image_path?"Open source ↗":"Open cited page ↗");link.href=url;link.target="_blank";link.rel="noopener";actions.append(link)}cite.append(actions);wrap.append(cite)});card.append(wrap)}block.append(card);scrollBottom()}
-$("#lightbox-close").onclick=()=>lightbox.classList.add("hidden");lightbox.onclick=e=>{if(e.target===lightbox)lightbox.classList.add("hidden")};askForm.onsubmit=async e=>{e.preventDefault();const q=questionInput.value.trim();if(!q)return;questionInput.value="";askBtn.disabled=true;const b=renderQuestion(q),l=renderLoading(b);try{const r=await fetch("/api/ask",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({question:q})}),d=await r.json();renderAnswer(b,l,r.ok?d:{status:"ERROR",answer:d.error,citations:[]})}catch(x){renderAnswer(b,l,{status:"ERROR",answer:`Request failed: ${x.message}`,citations:[]})}finally{askBtn.disabled=false;loadGaps()}};document.querySelectorAll("[data-question]").forEach(b=>b.onclick=()=>{questionInput.value=b.dataset.question;questionInput.focus()});
-async function loadDocuments(){try{const d=await(await fetch("/api/documents")).json(),docs=d.documents||[];$("#source-count").textContent=docs.length;docListEl.replaceChildren();if(!docs.length)docListEl.append(el("li","muted","Upload your first source to begin."));docs.forEach(doc=>{const i=el("li","doc-item"),info=el("div","doc-info");info.append(el("span","doc-name",doc.doc_id),el("small","",`${doc.page_count||1} ${(doc.page_count||1)===1?"page":"pages"}`));i.append(info,el("span","doc-badge",typeLabel[doc.doc_type]||doc.doc_type));docListEl.append(i)})}catch{docListEl.replaceChildren(el("li","muted","Couldn’t load the source library."))}}
-async function loadGaps(){try{const d=await(await fetch("/api/gaps")).json();gapSummaryEl.replaceChildren();const st=el("div","study-stats");st.append(el("strong","",`${d.answeredCount||0}`),el("span","","grounded answers"));gapSummaryEl.append(st,el("p",d.touched?.length?"covered":"muted",d.touched?.length?`Reviewed: ${d.touched.join(", ")}`:"Ask a question to start mapping coverage."));if(d.untouched?.length)gapSummaryEl.append(el("p","uncovered",`Still to review: ${d.untouched.join(", ")}`))}catch{gapSummaryEl.textContent="Coverage is temporarily unavailable."}}$("#refresh-gaps").onclick=loadGaps;
-function syncUpload(){const t=uploadType.value;fileInput.accept=t==="handwritten"?"image/png,image/jpeg":t==="notes"?".md,.txt,text/plain,text/markdown":"application/pdf";fileInput.value="";fileName.textContent=""}uploadType.onchange=syncUpload;fileInput.onchange=()=>fileName.textContent=fileInput.files[0]?.name||"";["dragenter","dragover"].forEach(n=>dropZone.addEventListener(n,e=>{e.preventDefault();dropZone.classList.add("dragging")}));["dragleave","drop"].forEach(n=>dropZone.addEventListener(n,e=>{e.preventDefault();dropZone.classList.remove("dragging")}));dropZone.addEventListener("drop",e=>{if(e.dataTransfer.files.length){fileInput.files=e.dataTransfer.files;fileName.textContent=fileInput.files[0].name}});uploadForm.onsubmit=async e=>{e.preventDefault();const f=fileInput.files[0];if(!f)return;const d=new FormData();d.append("type",uploadType.value);d.append("file",f);uploadStatus.textContent="Indexing your source…";try{const r=await fetch("/api/upload",{method:"POST",body:d}),x=await r.json();uploadStatus.textContent=r.ok?`✓ ${x.message}`:`Upload failed: ${x.error||"unknown error"}`;if(r.ok){syncUpload();loadDocuments();loadGaps()}}catch(x){uploadStatus.textContent=`Upload failed: ${x.message}`}};
-async function restoreHistory(){try{const d=await(await fetch("/api/history")).json();if(!d.questionsAsked?.length)return;clearWelcome();d.questionsAsked.forEach(q=>{const b=renderQuestion(q.question);if(q.answer)renderAnswer(b,null,{status:q.status,answer:q.answer,citations:q.citations||[]});else{const c=el("section","answer-card history-card");c.append(el("span",`status-pill status-${q.status}`,q.status==="ANSWERED"?"Previously answered":"Not covered"));b.append(c)}})}catch{}}syncUpload();loadDocuments();loadGaps();restoreHistory();
+const $ = (s) => document.querySelector(s);
+
+const chatEl = $("#chat");
+const askForm = $("#ask-form");
+const questionInput = $("#question-input");
+const askBtn = $("#ask-btn");
+
+const docListEl = $("#doc-list");
+const gapSummaryEl = $("#gap-summary");
+
+const uploadForm = $("#upload-form");
+const uploadType = $("#upload-type");
+const fileInput = $("#file-input");
+const fileName = $("#file-name");
+const uploadStatus = $("#upload-status");
+const dropZone = $("#drop-zone");
+
+const lightbox = $("#lightbox");
+const lightboxImg = $("#lightbox-img");
+
+/* =========================
+   DOCUMENT TYPE LABELS
+========================= */
+
+const typeLabel = {
+  pdf: "LECTURE",
+  lecture: "LECTURE",
+  slides: "SLIDES",
+  slide: "SLIDES",
+  markdown: "NOTES",
+  notes: "NOTES",
+  handwritten: "HANDWRITTEN",
+};
+
+/* =========================
+   DOM HELPERS
+========================= */
+
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+
+  if (className) {
+    node.className = className;
+  }
+
+  if (text) {
+    node.textContent = text;
+  }
+
+  return node;
+}
+
+function clearWelcome() {
+  $(".empty-state")?.remove();
+}
+
+function scrollBottom() {
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
+
+/* =========================
+   QUESTION RENDERING
+========================= */
+
+function renderQuestion(question) {
+  clearWelcome();
+
+  const block = el("article", "qa-block");
+
+  const bubble = el(
+    "div",
+    "question-bubble",
+    question
+  );
+
+  block.append(bubble);
+  chatEl.append(block);
+
+  scrollBottom();
+
+  return block;
+}
+
+/* =========================
+   LOADING STATE
+========================= */
+
+function renderLoading(block) {
+  const loading = el(
+    "div",
+    "answer-card loading",
+    "Reading your material and checking sources…"
+  );
+
+  block.append(loading);
+
+  scrollBottom();
+
+  return loading;
+}
+
+/* =========================
+   SOURCE URL
+========================= */
+
+function sourceUrl(citation) {
+  if (!citation.source_path) {
+    return null;
+  }
+
+  const page =
+    citation.page &&
+    citation.doc_type !== "handwritten"
+      ? `#page=${citation.page}`
+      : "";
+
+  return `/corpus/${citation.source_path}${page}`;
+}
+
+/* =========================
+   ANSWER RENDERING
+========================= */
+
+function renderAnswer(block, loading, result) {
+  loading?.remove();
+
+  const card = el("section", "answer-card");
+  const header = el("div", "answer-header");
+
+  /* Status */
+
+  const statusText =
+    result.status === "ANSWERED"
+      ? "Grounded answer"
+      : result.status === "NOT_COVERED"
+        ? "Not covered"
+        : "Couldn’t verify";
+
+  const pill = el(
+    "span",
+    `status-pill status-${result.status}`,
+    statusText
+  );
+
+  header.append(pill);
+
+  /* Verified badge */
+
+  if (result.status === "ANSWERED") {
+    header.append(
+      el(
+        "span",
+        "verified",
+        "SOURCE CHECKED"
+      )
+    );
+  }
+
+  card.append(header);
+
+  /* Answer */
+
+  card.append(
+    el(
+      "p",
+      "answer-text",
+      result.answer || "No answer returned."
+    )
+  );
+
+  /* Citations */
+
+  if (result.citations?.length) {
+    const citationsWrapper = el(
+      "div",
+      "citations"
+    );
+
+    citationsWrapper.append(
+      el(
+        "p",
+        "citation-title",
+        "READ IT IN CONTEXT"
+      )
+    );
+
+    result.citations.forEach((citation) => {
+      const cite = el("article", "citation");
+      const meta = el("div", "citation-meta");
+
+      /* Citation type */
+
+      meta.append(
+        el(
+          "span",
+          "cite-type",
+          typeLabel[citation.doc_type] || "SOURCE"
+        )
+      );
+
+      /* Document name + page */
+
+      const documentLabel =
+        `${citation.doc_id}${
+          citation.page != null
+            ? ` · page ${citation.page}`
+            : ""
+        }`;
+
+      meta.append(
+        el(
+          "strong",
+          "",
+          documentLabel
+        )
+      );
+
+      /* OCR confidence */
+
+      if (citation.ocr_confidence === "low") {
+        meta.append(
+          el(
+            "span",
+            "confidence-flag",
+            "OCR: REVIEW ORIGINAL"
+          )
+        );
+      }
+
+      cite.append(meta);
+
+      /* Excerpt */
+
+      if (citation.excerpt) {
+        cite.append(
+          el(
+            "p",
+            "citation-excerpt",
+            `“${citation.excerpt}”`
+          )
+        );
+      }
+
+      /* Citation actions */
+
+      const actions = el(
+        "div",
+        "citation-actions"
+      );
+
+      /* View original image */
+
+      if (citation.image_path) {
+        const viewButton = el(
+          "button",
+          "source-action",
+          "View original image"
+        );
+
+        viewButton.type = "button";
+
+        viewButton.onclick = () => {
+          lightboxImg.src =
+            `/corpus/${citation.image_path}`;
+
+          lightbox.classList.remove("hidden");
+        };
+
+        actions.append(viewButton);
+      }
+
+      /* Open source */
+
+      const url = sourceUrl(citation);
+
+      if (url) {
+        const link = el(
+          "a",
+          "source-action",
+          citation.image_path
+            ? "Open source ↗"
+            : "Open cited page ↗"
+        );
+
+        link.href = url;
+        link.target = "_blank";
+        link.rel = "noopener";
+
+        actions.append(link);
+      }
+
+      cite.append(actions);
+      citationsWrapper.append(cite);
+    });
+
+    card.append(citationsWrapper);
+  }
+
+  block.append(card);
+
+  scrollBottom();
+}
+
+/* =========================
+   LIGHTBOX
+========================= */
+
+$("#lightbox-close").onclick = () => {
+  lightbox.classList.add("hidden");
+};
+
+lightbox.onclick = (event) => {
+  if (event.target === lightbox) {
+    lightbox.classList.add("hidden");
+  }
+};
+
+/* =========================
+   ASK QUESTION
+========================= */
+
+askForm.onsubmit = async (event) => {
+  event.preventDefault();
+
+  const question = questionInput.value.trim();
+
+  if (!question) {
+    return;
+  }
+
+  questionInput.value = "";
+  askBtn.disabled = true;
+
+  const block = renderQuestion(question);
+  const loading = renderLoading(block);
+
+  try {
+    const response = await fetch("/api/ask", {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify({
+        question,
+      }),
+    });
+
+    const data = await response.json();
+
+    renderAnswer(
+      block,
+      loading,
+      response.ok
+        ? data
+        : {
+            status: "ERROR",
+            answer: data.error,
+            citations: [],
+          }
+    );
+  } catch (error) {
+    renderAnswer(block, loading, {
+      status: "ERROR",
+      answer: `Request failed: ${error.message}`,
+      citations: [],
+    });
+  } finally {
+    askBtn.disabled = false;
+
+    loadGaps();
+  }
+};
+
+/* =========================
+   STARTER QUESTIONS
+========================= */
+
+document
+  .querySelectorAll("[data-question]")
+  .forEach((button) => {
+    button.onclick = () => {
+      questionInput.value =
+        button.dataset.question;
+
+      questionInput.focus();
+    };
+  });
+
+/* =========================
+   LOAD DOCUMENTS
+========================= */
+
+async function loadDocuments() {
+  try {
+    const response = await fetch(
+      "/api/documents"
+    );
+
+    const data = await response.json();
+
+    const documents = data.documents || [];
+
+    $("#source-count").textContent =
+      documents.length;
+
+    docListEl.replaceChildren();
+
+    /* Empty state */
+
+    if (!documents.length) {
+      docListEl.append(
+        el(
+          "li",
+          "muted",
+          "Upload your first source to begin."
+        )
+      );
+    }
+
+    /* Documents */
+
+    documents.forEach((doc) => {
+      const item = el("li", "doc-item");
+      const info = el("div", "doc-info");
+
+      const pageCount =
+        doc.page_count || 1;
+
+      const pageText =
+        `${pageCount} ${
+          pageCount === 1
+            ? "page"
+            : "pages"
+        }`;
+
+      info.append(
+        el(
+          "span",
+          "doc-name",
+          doc.doc_id
+        ),
+
+        el(
+          "small",
+          "",
+          pageText
+        )
+      );
+
+      item.append(
+        info,
+
+        el(
+          "span",
+          "doc-badge",
+          typeLabel[doc.doc_type] ||
+            doc.doc_type
+        )
+      );
+
+      docListEl.append(item);
+    });
+  } catch {
+    docListEl.replaceChildren(
+      el(
+        "li",
+        "muted",
+        "Couldn’t load the source library."
+      )
+    );
+  }
+}
+
+/* =========================
+   COVERAGE / GAPS
+========================= */
+
+async function loadGaps() {
+  try {
+    const response = await fetch(
+      "/api/gaps"
+    );
+
+    const data = await response.json();
+
+    gapSummaryEl.replaceChildren();
+
+    const stats = el(
+      "div",
+      "study-stats"
+    );
+
+    stats.append(
+      el(
+        "strong",
+        "",
+        `${data.answeredCount || 0}`
+      ),
+
+      el(
+        "span",
+        "",
+        "grounded answers"
+      )
+    );
+
+    gapSummaryEl.append(stats);
+
+    /* Covered topics */
+
+    if (data.touched?.length) {
+      gapSummaryEl.append(
+        el(
+          "p",
+          "covered",
+          `Reviewed: ${data.touched.join(", ")}`
+        )
+      );
+    } else {
+      gapSummaryEl.append(
+        el(
+          "p",
+          "muted",
+          "Ask a question to start mapping coverage."
+        )
+      );
+    }
+
+    /* Uncovered topics */
+
+    if (data.untouched?.length) {
+      gapSummaryEl.append(
+        el(
+          "p",
+          "uncovered",
+          `Still to review: ${data.untouched.join(", ")}`
+        )
+      );
+    }
+  } catch {
+    gapSummaryEl.textContent =
+      "Coverage is temporarily unavailable.";
+  }
+}
+
+$("#refresh-gaps").onclick = loadGaps;
+
+/* =========================
+   UPLOAD CONFIGURATION
+========================= */
+
+function syncUpload() {
+  const type = uploadType.value;
+
+  if (type === "handwritten") {
+    fileInput.accept =
+      "image/png,image/jpeg";
+  } else if (type === "notes") {
+    fileInput.accept =
+      ".md,.txt,text/plain,text/markdown";
+  } else {
+    fileInput.accept = "application/pdf";
+  }
+
+  fileInput.value = "";
+  fileName.textContent = "";
+}
+
+uploadType.onchange = syncUpload;
+
+/* =========================
+   FILE INPUT
+========================= */
+
+fileInput.onchange = () => {
+  fileName.textContent =
+    fileInput.files[0]?.name || "";
+};
+
+/* =========================
+   DRAG & DROP
+========================= */
+
+["dragenter", "dragover"].forEach(
+  (eventName) => {
+    dropZone.addEventListener(
+      eventName,
+      (event) => {
+        event.preventDefault();
+
+        dropZone.classList.add(
+          "dragging"
+        );
+      }
+    );
+  }
+);
+
+["dragleave", "drop"].forEach(
+  (eventName) => {
+    dropZone.addEventListener(
+      eventName,
+      (event) => {
+        event.preventDefault();
+
+        dropZone.classList.remove(
+          "dragging"
+        );
+      }
+    );
+  }
+);
+
+dropZone.addEventListener(
+  "drop",
+  (event) => {
+    if (event.dataTransfer.files.length) {
+      fileInput.files =
+        event.dataTransfer.files;
+
+      fileName.textContent =
+        fileInput.files[0].name;
+    }
+  }
+);
+
+/* =========================
+   UPLOAD SOURCE
+========================= */
+
+uploadForm.onsubmit = async (event) => {
+  event.preventDefault();
+
+  const file = fileInput.files[0];
+
+  if (!file) {
+    return;
+  }
+
+  const formData = new FormData();
+
+  formData.append(
+    "type",
+    uploadType.value
+  );
+
+  formData.append(
+    "file",
+    file
+  );
+
+  uploadStatus.textContent =
+    "Indexing your source…";
+
+  try {
+    const response = await fetch(
+      "/api/upload",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data =
+      await response.json();
+
+    uploadStatus.textContent =
+      response.ok
+        ? `✓ ${data.message}`
+        : `Upload failed: ${
+            data.error ||
+            "unknown error"
+          }`;
+
+    if (response.ok) {
+      syncUpload();
+      loadDocuments();
+      loadGaps();
+    }
+  } catch (error) {
+    uploadStatus.textContent =
+      `Upload failed: ${error.message}`;
+  }
+};
+
+/* =========================
+   RESTORE HISTORY
+========================= */
+
+async function restoreHistory() {
+  try {
+    const response = await fetch(
+      "/api/history"
+    );
+
+    const data = await response.json();
+
+    if (!data.questionsAsked?.length) {
+      return;
+    }
+
+    clearWelcome();
+
+    data.questionsAsked.forEach(
+      (question) => {
+        const block = renderQuestion(
+          question.question
+        );
+
+        if (question.answer) {
+          renderAnswer(
+            block,
+            null,
+            {
+              status: question.status,
+              answer: question.answer,
+              citations:
+                question.citations || [],
+            }
+          );
+        } else {
+          const card = el(
+            "section",
+            "answer-card history-card"
+          );
+
+          const statusText =
+            question.status === "ANSWERED"
+              ? "Previously answered"
+              : "Not covered";
+
+          card.append(
+            el(
+              "span",
+              `status-pill status-${question.status}`,
+              statusText
+            )
+          );
+
+          block.append(card);
+        }
+      }
+    );
+  } catch {
+    // History restoration is optional.
+  }
+}
+
+/* =========================
+   INITIALIZATION
+========================= */
+
+syncUpload();
+loadDocuments();
+loadGaps();
+restoreHistory();
