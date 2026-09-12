@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recall — your course, cited</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="/" aria-label="Recall home"><span class="brand-mark">R</span><span>recall</span></a>
+      <div class="course-label"><span class="pulse"></span> ACTIVE COURSE MATERIAL</div>
+      <section class="side-section sources-section">
+        <div class="section-heading"><h2>Sources</h2><span id="source-count">—</span></div>
+        <ul id="doc-list" class="doc-list"><li class="muted">Loading library…</li></ul>
+      </section>
+      <section class="side-section coverage-section">
+        <div class="section-heading"><h2>Study coverage</h2><button id="refresh-gaps" class="icon-button" title="Refresh coverage">↻</button></div>
+        <div id="gap-summary" class="gap-summary"><p class="muted">Your review map will build as you study.</p></div>
+      </section>
+      <section class="side-section upload-section">
+        <div class="section-heading"><h2>Add material</h2><span>25 MB max</span></div>
+        <form id="upload-form">
+          <label class="type-label" for="upload-type">Classify as</label>
+          <select id="upload-type"><option value="lecture">Lecture PDF</option><option value="slide">Slide deck PDF</option><option value="handwritten">Handwritten image</option><option value="notes">Text or Markdown notes</option></select>
+          <label id="drop-zone" class="drop-zone" for="file-input"><span class="upload-icon">↑</span><strong>Choose a file</strong><small>or drag it here</small><input type="file" id="file-input" accept="application/pdf" required /></label>
+          <p id="file-name" class="file-name"></p><button type="submit" class="upload-button">Upload &amp; index</button>
+        </form>
+        <p id="upload-status" class="upload-status" aria-live="polite"></p>
+      </section>
+      <p class="local-note">Your materials stay in this workspace.</p>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div><p class="eyebrow">EXAM MODE</p><h1>Ask your course materials.</h1></div><div class="trust-chip"><span>✓</span> Citation-first answers</div></header>
+      <div id="chat" class="chat"><section class="welcome-card empty-state"><p class="eyebrow">THE 2AM STUDY PARTNER</p><h2>Understand the thing.<br><em>Find it again.</em></h2><p>Every answer is grounded in your own documents. Open the cited page, inspect the original handwritten note, and get a clean refusal when your material is silent.</p><div class="starter-questions"><button data-question="Compare the two main algorithms in my notes and cite the pages.">Compare two algorithms</button><button data-question="What is the most important definition I should memorise?">Find key definitions</button><button data-question="What topics have I not reviewed yet?">Show my gaps</button></div></section></div>
+      <form id="ask-form" class="ask-form"><label class="ask-label" for="question-input">ASK RECALL</label><div class="input-row"><input type="text" id="question-input" placeholder="What is the difference between these two algorithms?" autocomplete="off" /><button type="submit" id="ask-btn">Ask <span>↵</span></button></div><p>Answers only from your uploaded course material.</p></form>
+    </main>
+  </div>
+  <div id="lightbox" class="lightbox hidden" role="dialog" aria-modal="true"><div class="lightbox-content"><button id="lightbox-close" class="lightbox-close" aria-label="Close">×</button><img id="lightbox-img" src="" alt="Original handwritten source page" /></div></div>
+  <script src="app.js"></script>
+</body>
+</html>
