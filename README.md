@@ -1,3 +1,9 @@
+# Demo Video
+
+https://github.com/user-attachments/assets/1ba3ca31-d41c-40e6-a8d7-032ef0eab225
+
+
+
 # Study Buddy — the 2AM exam tool
 
 Answers questions from *your own* course material — lecture PDFs, slides,
