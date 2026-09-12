@@ -222,8 +222,8 @@ Groq can optionally be used for final answer generation. It is generally faster 
 
 ### High-Level Design (HLD)
 
-![High-Level Design](./docs/HLD.jpg)
+![High-Level Design](./docs/HLD.png)
 
 ### Low-Level Design (LLD)
 
-![Low-Level Design](./docs/LLD.jpg)
+![Low-Level Design](./docs/LLD.png)
