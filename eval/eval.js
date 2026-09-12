@@ -1,10 +1,4 @@
-// Scores the pipeline against eval/questions.json.
-// Run with: npm run eval
-//
-// Fully implemented — this reads your labeled questions, calls the
-// same retrieve()/generateAnswer() functions the server uses, and
-// prints a scoreboard. Nothing to edit here; go fill in questions.json
-// with your real 20 answerable + 10 unanswerable questions instead.
+
 
 const fs = require("fs");
 const path = require("path");
