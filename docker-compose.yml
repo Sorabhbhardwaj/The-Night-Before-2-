@@ -1,0 +1,51 @@
+# Runs Ollama in Docker. The Node app itself still runs natively on
+# your host (npm start) — only the model server is containerized.
+#
+# Usage:
+#   docker compose up -d              # start Ollama
+#   docker compose exec ollama ollama pull llava
+#   docker compose exec ollama ollama pull llama3.1:8b
+#
+# Ollama will be reachable at http://localhost:11434 from your host,
+# which matches the default OLLAMA_BASE_URL in .env.example — no other
+# config changes needed for this setup.
+#
+# If you later decide to containerize the Node app too, see the
+# commented-out `app` service at the bottom of this file.
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: study-buddy-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    restart: unless-stopped
+    # Uncomment to enable GPU acceleration if you have an NVIDIA GPU
+    # and the NVIDIA Container Toolkit installed:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  # --- Optional: uncomment this if you want the Node app in Docker too ---
+  # app:
+  #   build: .
+  #   container_name: study-buddy-app
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - OLLAMA_BASE_URL=http://ollama:11434   # service name, not localhost, when both are in Docker
+  #   volumes:
+  #     - ./corpus:/app/corpus
+  #     - ./data:/app/data
+  #   depends_on:
+  #     - ollama
+  #   restart: unless-stopped
+
+volumes:
+  ollama-models:
