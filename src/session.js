@@ -1,7 +1,4 @@
-// Session memory: this is what makes the tool feel like a study
-// companion instead of a stateless search box. Tracks what's been
-// asked and which documents have been touched across a session, so it
-// can eventually tell the student what they haven't reviewed yet.
+
 
 const db = require("./db");
 
@@ -30,14 +27,10 @@ function getOrCreateSession(sessionId) {
   };
 }
 
-/**
- * Record a question + which docs its answer cited.
- * Fully implemented — call this after every /api/ask.
- */
+
 function recordQuestion(sessionId, question, result, legacyCitedDocIds) {
   const session = getOrCreateSession(sessionId);
-  // Retain compatibility with older callers/tests using
-  // recordQuestion(sessionId, question, status, citedDocIds).
+
   if (typeof result === "string") {
     result = {
       status: result,
@@ -47,8 +40,7 @@ function recordQuestion(sessionId, question, result, legacyCitedDocIds) {
   }
   const citedDocIds = (result.citations || []).map((citation) => citation.doc_id);
 
-  // Persist the complete rendered result, not just the question/status, so
-  // a refreshed study session remains a useful conversation.
+ 
   session.questionsAsked.push({
     question,
     status: result.status,
@@ -72,16 +64,7 @@ const getAllDocsStmt = db.prepare("SELECT doc_id, doc_type FROM documents");
 
 /**
  * Given a session, produce a "here's what you haven't covered" summary
- * — the feature that makes this a study companion rather than a
- * stateless search box.
- *
- * Beyond a flat touched/untouched split, this also flags documents
- * that were only glanced at (cited in just one answered question) vs.
- * ones covered more thoroughly, and separately counts how many of the
- * session's questions actually got an ANSWERED result vs. NOT_COVERED
- * — a student who's mostly hitting NOT_COVERED is a signal worth
- * surfacing too (either they're asking about the wrong course, or
- * genuinely exploring the edges of what their notes contain).
+
  *
  * @param {string} sessionId
  * @returns {{

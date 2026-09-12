@@ -1,12 +1,11 @@
-// Database setup. Fully implemented — this is boilerplate, not a design
-// decision, so there's nothing for you to fill in here.
+
 
 const Database = require("better-sqlite3");
 const fs = require("fs");
 const path = require("path");
 const { DB_PATH } = require("./config");
 
-// Make sure the /data folder exists before opening the DB file.
+
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
 const db = new Database(DB_PATH);
@@ -39,7 +38,7 @@ db.exec(`
   );
 `);
 
-// Lightweight migration for databases created by earlier project versions.
+
 const documentColumns = db.prepare("PRAGMA table_info(documents)").all().map((column) => column.name);
 if (!documentColumns.includes("content_hash")) {
   db.exec("ALTER TABLE documents ADD COLUMN content_hash TEXT");

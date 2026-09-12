@@ -1,12 +1,4 @@
-// Orchestrates the full ingestion pipeline: reads every file in /corpus,
-// extracts + chunks text, embeds each chunk, and stores everything in
-// SQLite. Run with: npm run ingest
-//
-// Fully implemented — this file just calls the functions you implement
-// in ingestText.js and ingestHandwriting.js and wires them together.
-// You shouldn't need to edit this file; if chunkPage() or
-// transcribeHandwriting() aren't implemented yet, this will fail loudly
-// at that step, which is expected.
+
 
 const fs = require("fs");
 const path = require("path");

@@ -1,9 +1,4 @@
-// Handles PDFs, slides (also PDFs), and markdown/text files.
-//
-// The raw extraction (pulling text out of a PDF, reading a markdown file)
-// is boilerplate and is done for you below. The part that's actually a
-// design decision — how you split that raw text into citable chunks —
-// is left for you to implement in chunkPage().
+
 
 const fs = require("fs");
 const path = require("path");
@@ -18,9 +13,7 @@ const pdfParse = require("pdf-parse");
 async function extractPdfPages(filePath) {
   const buffer = fs.readFileSync(filePath);
 
-  // pdf-parse gives us the whole document's text in one go by default.
-  // We use its pagerender hook to capture text per page instead, since
-  // citations need to point at a specific page number.
+
   const pages = [];
   await pdfParse(buffer, {
     pagerender: async (pageData) => {
@@ -46,24 +39,6 @@ function extractMarkdown(filePath) {
 }
 
 /**
- * Split one page's raw text into an array of citable chunks.
- *
- * Strategy: heading-aware with a word-count fallback.
- *   1. If the text contains markdown-style headings (# ## ###), split
- *      on those first — each section becomes its own chunk, since a
- *      heading is usually a real semantic boundary the professor drew
- *      themselves ("Time Complexity", "Edge Cases", etc.).
- *   2. Any resulting section that's too long (> MAX_WORDS) gets
- *      further split on paragraph breaks, so we never hand the
- *      embedding model a wall of text where one relevant sentence
- *      gets diluted by three paragraphs of unrelated content.
- *   3. Any section that's too short (< MIN_WORDS) gets merged into the
- *      next chunk instead of standing alone — a 3-word leftover chunk
- *      ("See Figure 2.") is useless for retrieval and just adds noise.
- *   4. PDFs (lecture notes, slides) rarely have literal '#' markdown
- *      headings, so for those this effectively falls through to
- *      paragraph-based splitting, which is the right default when
- *      there's no explicit structure to key off.
  *
  * @param {string} rawText - the full text of one page
  * @returns {string[]} - array of chunk strings
@@ -77,8 +52,7 @@ function chunkPage(rawText) {
   const wordCount = (s) => s.split(/\s+/).filter(Boolean).length;
   const join = (left, right) => (left ? `${left}\n\n${right}` : right);
 
-  // PDF extractors often flatten a visual page into one long paragraph.
-  // Sentences are the last semantic boundary available in that case.
+ 
   const splitLongText = (value, limit) => {
     const sentences = value.match(/[^.!?]+(?:[.!?]+(?=\s|$)|$)/g) || [value];
     const pieces = [];
@@ -140,8 +114,7 @@ function chunkPage(rawText) {
       .map((p) => p.trim())
       .filter(Boolean);
 
-    // Keep an explicit heading in every emitted child chunk. It gives a
-    // chunk enough context to stand on its own when retrieved later.
+
     const contentLimit = Math.max(1, MAX_WORDS - wordCount(section.heading));
     const units = paragraphs.flatMap((paragraph) => splitLongText(paragraph, contentLimit));
     if (units.length === 0 && section.heading) {
@@ -162,8 +135,7 @@ function chunkPage(rawText) {
     if (buffer) chunks.push(join(section.heading, buffer));
   }
 
-  // Step 3: merge any too-short trailing chunk into its neighbor rather
-  // than let it stand alone as noise.
+ 
   const merged = [];
   for (const chunk of chunks) {
     if (merged.length > 0 && wordCount(chunk) < MIN_WORDS && wordCount(join(merged[merged.length - 1], chunk)) <= MAX_WORDS) {

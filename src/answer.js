@@ -1,9 +1,4 @@
-// Turns retrieved chunks into a final structured answer.
-//
-// This is the step responsible for two of the three required "states":
-// ANSWERED and NOT_COVERED (the third, CONTRADICTED, only applies if
-// you extend this for contradiction detection — optional here since
-// this project's brief doesn't require it, unlike the rulebook project).
+
 
 const { generateText } = require("./ollamaClient");
 
@@ -39,13 +34,7 @@ Respond with ONLY a JSON object in exactly this shape, and nothing else — no m
 If status is "NOT_COVERED", citations should be an empty array.`;
 }
 
-/**
- * Best-effort parse of the model's response into the expected shape.
- * Local models sometimes wrap JSON in markdown fences or add stray
- * text before/after — this strips common wrappers before parsing, and
- * falls back to a safe NOT_COVERED-shaped error object rather than
- * throwing, so a single malformed response doesn't crash the request.
- */
+
 function parseModelResponse(raw) {
   let cleaned = String(raw || "").trim();
 
@@ -53,8 +42,7 @@ function parseModelResponse(raw) {
   const fenceMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)```/i);
   if (fenceMatch) cleaned = fenceMatch[1].trim();
 
-  // Extract one balanced object rather than using a greedy regex: braces
-  // inside an answer string or a second object after it must not corrupt it.
+
   const start = cleaned.indexOf("{");
   if (start >= 0) {
     let depth = 0;
@@ -91,10 +79,7 @@ function parseModelResponse(raw) {
   }
 }
 
-// Models occasionally cite a displayed source label ("Source 1"), change the
-// filename's case, or serialize a page number as a string.  Those references
-// still refer to a retrieved excerpt, so resolve them before deciding that an
-// otherwise grounded answer has no usable citation.
+
 function resolveCitation(citation, chunks) {
   if (!citation || typeof citation !== "object") return null;
 
@@ -120,8 +105,7 @@ function resolveCitation(citation, chunks) {
  * @returns {Promise<{ status: "ANSWERED"|"NOT_COVERED"|"ERROR", answer: string, citations: object[] }>}
  */
 async function generateAnswer(question, retrieval) {
-  // Retrieval already found nothing relevant — no point spending an
-  // LLM call asking it to notice the same thing.
+
   if (!retrieval.confident || retrieval.chunks.length === 0) {
     return {
       status: "NOT_COVERED",
@@ -134,13 +118,8 @@ async function generateAnswer(question, retrieval) {
   const raw = await generateText(prompt);
   const parsed = parseModelResponse(raw);
 
-  // Backfill citation metadata (ocr_confidence, image_path) from the
-  // original retrieved chunks, since the model only echoes back
-  // doc_id/page/excerpt and the frontend needs the rest to render
-  // the handwritten-page image + confidence badge correctly.
   if (parsed.status === "ANSWERED") {
-    // Do not return citations invented by the model: each one must point
-    // to an actually retrieved chunk.
+
     parsed.citations = parsed.citations.flatMap((cite) => {
       const match = resolveCitation(cite, retrieval.chunks);
       if (!match) return [];
@@ -159,10 +138,7 @@ async function generateAnswer(question, retrieval) {
       }];
     });
     if (parsed.citations.length === 0) {
-      // The model confirmed it could answer from these excerpts but omitted
-      // citation JSON. Cite the highest-ranked retrieved excerpt rather than
-      // turning a supported answer into a false refusal. The source is still
-      // restricted to the retrieval result, never invented.
+  
       const match = retrieval.chunks[0];
       return {
         ...parsed,

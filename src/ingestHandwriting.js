@@ -1,6 +1,4 @@
-// Handles photos of handwritten notes. This is the hard constraint of
-// the whole project — a bad implementation here shows up immediately in
-// your eval numbers on the handwritten-source questions.
+
 
 const { generateVision } = require("./ollamaClient");
 const { USE_ANTHROPIC, ANTHROPIC_API_KEY } = require("./config");
@@ -35,19 +33,15 @@ Output only the transcription followed by the CONFIDENCE line. No other commenta
 async function transcribeHandwriting(imagePath) {
   const raw = await generateVision(imagePath, OCR_PROMPT);
 
-  // Split off the CONFIDENCE line if the model included one.
+ 
   const confidenceMatch = raw.match(/^\s*CONFIDENCE:\s*(HIGH|LOW)\s*$/im);
-  // A missing verdict is an instruction-following failure, not evidence
-  // that the page is readable. Default conservatively to low.
+  
   const modelSaysHigh = confidenceMatch ? confidenceMatch[1].toUpperCase() === "HIGH" : false;
 
-  // Strip the confidence line out of the transcription text itself.
+
   const text = raw.replace(/^\s*CONFIDENCE:\s*(HIGH|LOW)\s*$/gim, "").trim();
 
-  // Sanity-check the model's self-rating: count how many [unclear: ...]
-  // markers appear relative to transcription length. More than ~1
-  // marker per 40 words is treated as low confidence regardless of
-  // what the model claimed about itself.
+ 
   const unclearCount = (text.match(/\[unclear:/gi) || []).length;
   const wordCount = text.split(/\s+/).filter(Boolean).length || 1;
   const unclearDensity = unclearCount / wordCount;

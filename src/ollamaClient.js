@@ -1,7 +1,4 @@
-// Thin wrapper around Ollama's local HTTP API. Fully implemented — this
-// is plumbing, not a design decision. Swap in Anthropic calls inside
-// ingestHandwriting.js / answer.js if you set USE_ANTHROPIC = true in
-// config.js; this file only needs to exist for the free/local path.
+
 
 const fetch = require("node-fetch");
 const fs = require("fs");
@@ -46,10 +43,7 @@ async function generateGroqText(prompt) {
         reasoning_effort: "low",
         reasoning_format: "hidden",
         max_completion_tokens: GROQ_MAX_COMPLETION_TOKENS,
-        // Do not request Groq's strict JSON validator here. Some generations
-        // from gpt-oss-20b are rejected by it before reaching our resilient
-        // parser, producing a 400 json_validate_failed response. The prompt
-        // already requests JSON and answer.js safely strips/parses it.
+    
       }),
     });
       if (res.ok) {

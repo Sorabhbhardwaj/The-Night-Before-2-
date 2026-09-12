@@ -1,6 +1,3 @@
-// Local embedding model wrapper. Fully implemented — loading the model
-// and running inference is boilerplate; there's no design decision here
-// other than which model to use (already picked in config.js).
 
 const { EMBEDDING_MODEL } = require("./config");
 
@@ -8,7 +5,7 @@ let embedderPromise = null;
 
 async function getEmbedder() {
   if (!embedderPromise) {
-    // Dynamic import because @xenova/transformers is an ESM package.
+
     const { pipeline } = await import("@xenova/transformers");
     embedderPromise = pipeline("feature-extraction", EMBEDDING_MODEL);
   }
